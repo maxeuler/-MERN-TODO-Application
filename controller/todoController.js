@@ -16,7 +16,7 @@ exports.updateTodo = async (req, res) => {
 		new: true,
 		runValidators: true
 	}).exec();
-	res.redirect('/');
+	res.json({ todo: todo });
 };
 
 exports.deleteTodo = async (req, res) => {

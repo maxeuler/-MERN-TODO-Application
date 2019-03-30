@@ -3,7 +3,6 @@ import { Container } from 'reactstrap';
 import axios from 'axios';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
-import './App.css';
 
 import Header from './components/Header';
 import TodoInput from './components/TodoInput';
@@ -13,13 +12,15 @@ import EditModal from './components/EditModal';
 class App extends Component {
 	state = {
 		todos: [],
-		modal: false
+		modal: false,
+		todoEdit: ''
 	};
 
 	constructor(props) {
 		super(props);
 		this.addTodo = this.addTodo.bind(this);
 		this.deleteTodo = this.deleteTodo.bind(this);
+		this.updateTodo = this.updateTodo.bind(this);
 		this.toggle = this.toggle.bind(this);
 	}
 
@@ -34,7 +35,6 @@ class App extends Component {
 	}
 
 	addTodo = task => {
-		console.log('add' + task);
 		axios
 			.post('/api/todos', { task })
 			.then(res =>
@@ -54,9 +54,25 @@ class App extends Component {
 			.catch(err => console.log(err));
 	};
 
+	updateTodo = (task, id) => {
+		console.log(task);
+		axios.post(`/api/todos/${this.state.todoEdit._id}`, { task }).then(res =>
+			this.setState({
+				modal: !this.state.modal,
+				todos: this.state.todos.map(todo => {
+					console.log(res.data);
+					if (todo._id === id) todo.task = res.data.todo.task;
+					return todo;
+				})
+			})
+		);
+	};
+
 	toggle = id => {
 		console.log(id);
-		this.setState({ modal: !this.state.modal });
+		const todo = this.state.todos.filter(todo => todo._id === id);
+		console.log(todo);
+		this.setState({ todoEdit: todo[0], modal: !this.state.modal });
 	};
 
 	render() {
@@ -64,7 +80,12 @@ class App extends Component {
 			<div className="App">
 				<Header />
 				<Container>
-					<EditModal toggle={this.toggle} modal={this.state.modal} />
+					<EditModal
+						toggle={this.toggle}
+						modal={this.state.modal}
+						todo={this.state.todoEdit}
+						update={this.updateTodo}
+					/>
 					<TodoInput addTodo={this.addTodo} />
 				</Container>
 				<br />
